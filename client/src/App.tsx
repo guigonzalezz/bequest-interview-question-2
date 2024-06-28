@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 const API_URL = "http://localhost:8080";
+const SECRET_KEY = "my_secret_key";
 
 function App() {
   const [data, setData] = useState<string>();
@@ -11,7 +12,7 @@ function App() {
   }, []);
 
   const getData = async () => {
-    const response = await fetch(API_URL);
+    const response = await fetch(API_URL, { headers: { 'Authorization': `Bearer ${SECRET_KEY}` } });
     const { data } = await response.json();
     setData(data);
     setIsValid(null);
@@ -22,8 +23,8 @@ function App() {
       method: "POST",
       body: JSON.stringify({ data }),
       headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
+        'Authorization': `Bearer ${SECRET_KEY}`,
+        'Content-Type': 'application/json'
       },
     });
 
@@ -33,7 +34,7 @@ function App() {
   const verifyData = async () => {
     const response = await fetch(`${API_URL}/verify`, {
       method: "POST",
-    });
+      headers: { 'Authorization': `Bearer ${SECRET_KEY}` }, });
     const { valid } = await response.json();
     setIsValid(valid);
   };

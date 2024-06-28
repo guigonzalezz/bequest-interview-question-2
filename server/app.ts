@@ -31,12 +31,25 @@ const verifySignature = (data: string, signature: string) => {
   return verify.verify(publicKey, signature, "hex");
 };
 
+const authenticateTokenMiddleware = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  const secretKey = "my_secret_key";
+
+  if (token === secretKey) {
+    next(); 
+  } else {
+    res.sendStatus(401);
+  }
+};
+
 // Routes
-app.get("/", (req, res) => {
+app.get("/", authenticateTokenMiddleware, (req, res) => {
   res.json(database);
 });
 
-app.post("/", (req, res) => {
+app.post("/", authenticateTokenMiddleware, (req, res) => {
   const { data } = req.body;
   const hash = createHash(data);
   const signature = signData(hash);
@@ -52,7 +65,7 @@ app.post("/", (req, res) => {
   res.sendStatus(200);
 });
 
-app.post("/verify", (req, res) => {
+app.post("/verify", authenticateTokenMiddleware, (req, res) => {
   const { data, hash, signature } = database;
   const currentHash = createHash(data);
   const valid = currentHash === hash && verifySignature(hash, signature);
