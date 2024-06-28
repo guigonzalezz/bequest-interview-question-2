@@ -4,6 +4,7 @@ const API_URL = "http://localhost:8080";
 
 function App() {
   const [data, setData] = useState<string>();
+  const [isValid, setIsValid] = useState<boolean | null>(null);
 
   useEffect(() => {
     getData();
@@ -13,6 +14,7 @@ function App() {
     const response = await fetch(API_URL);
     const { data } = await response.json();
     setData(data);
+    setIsValid(null);
   };
 
   const updateData = async () => {
@@ -29,7 +31,11 @@ function App() {
   };
 
   const verifyData = async () => {
-    throw new Error("Not implemented");
+    const response = await fetch(`${API_URL}/verify`, {
+      method: "POST",
+    });
+    const { valid } = await response.json();
+    setIsValid(valid);
   };
 
   return (
@@ -63,6 +69,12 @@ function App() {
           Verify Data
         </button>
       </div>
+
+      {isValid !== null && (
+        <div style={{ fontSize: "20px", color: isValid ? "green" : "red" }}>
+          {isValid ? "Data is valid" : "Data has been tampered with"}
+        </div>
+      )}
     </div>
   );
 }
